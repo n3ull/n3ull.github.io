@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            flex-shrink: 0;
+            transition: padding 0.3s;
+        }
+
+        .header.has-results {
+            padding: 20px;
+            flex-direction: row;
+            gap: 20px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .icon {
+            width: 60px;
+            height: 60px;
+            transition: all 0.3s;
+        }
+
+        .header.has-results .icon {
+            width: 32px;
+            height: 32px;
+        }
+
+        .icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        .search-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header.has-results .search-section {
+            flex-direction: row;
+            max-width: none;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .header.has-results .search-container {
+            max-width: 500px;
+        }
+
+        #searchInput {
+            width: 100%;
+            background: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 18px 50px 18px 24px;
+            font-size: 18px;
+            color: #000000;
+            outline: none;
+            cursor: help;
+        }
+
+        .header.has-results #searchInput {
+            padding: 12px 45px 12px 18px;
+            font-size: 16px;
+        }
+
+        #searchInput::placeholder {
+            color: #666666;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-wrapper::after {
+            content: '?';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #000000;
+            font-size: 20px;
+            font-weight: 300;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .header.has-results .search-wrapper::after {
+            font-size: 16px;
+            right: 16px;
+        }
+
+        #searchInput:focus + .search-wrapper::after,
+        .search-wrapper:focus-within::after {
+            opacity: 0;
+        }
+
+        .engines {
+            display: flex;
+            gap: 16px;
+        }
+
+        .header.has-results .engines {
+            gap: 12px;
+        }
+
+        .engine {
+            background: transparent;
+            border: none;
+            color: #333333;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: color 0.2s;
+        }
+
+        .engine:hover,
+        .engine.active {
+            color: #ffffff;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #444444;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header.has-results .hint {
+            display: none;
+        }
+
+        .results-container {
+            flex: 1;
+            display: none;
+            background: #0a0a0a;
+        }
+
+        .results-container.active {
+            display: block;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #ffffff;
+        }
+
+        .welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #222222;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="header" id="header">
+        <div class="icon">
+            <img src="https://files.catbox.moe/uvpf1q.png" alt="Cog" onerror="this.style.display='none'">
+        </div>
+
+        <div class="search-section">
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search incognito..." 
+                        autocomplete="off"
+                        spellcheck="false"
+                        autofocus
+                    >
+                </div>
+            </div>
+
+            <div class="engines">
+                <button class="engine active" onclick="setEngine('swisscows', this)">SwissCows</button>
+                <button class="engine" onclick="setEngine('duckduckgo', this)">DuckDuckGo</button>
+                <button class="engine" onclick="setEngine('brave', this)">Brave</button>
+            </div>
+        </div>
+
+        <div class="hint">Press Enter to search</div>
+    </div>
+
+    <div class="welcome" id="welcome">
+        Type to begin
+    </div>
+
+    <div class="results-container" id="resultsContainer">
+        <iframe id="resultsFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+    </div>
+
+    <script>
+        let currentEngine = 'swisscows';
+        
+        const engines = {
+            swisscows: 'https://swisscows.com/web?query=',
+            duckduckgo: 'https://duckduckgo.com/?q=',
+            brave: 'https://search.brave.com/search?q=',
+            startpage: 'https://www.startpage.com/do/dsearch?query='
+        };
+
+        const input = document.getElementById('searchInput');
+        const header = document.getElementById('header');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const resultsFrame = document.getElementById('resultsFrame');
+        const welcome = document.getElementById('welcome');
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const query = input.value.trim();
+                if (query) {
+                    performSearch(query);
+                }
+            }
+        });
+
+        function performSearch(query) {
+            const url = engines[currentEngine] + encodeURIComponent(query);
+            
+            // Show results view
+            header.classList.add('has-results');
+            welcome.style.display = 'none';
+            resultsContainer.classList.add('active');
+            
+            // Load results in iframe
+            resultsFrame.src = url;
+        }
+
+        function setEngine(engine, btn) {
+            currentEngine = engine;
+            document.querySelectorAll('.engine').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Reload current search if exists
+            const query = input.value.trim();
+            if (query && resultsContainer.classList.contains('active')) {
+                performSearch(query);
+            } else {
+                input.focus();
+            }
+        }
+
+        // Keep focus on input
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'INPUT' && !e.target.classList.contains('engine') && !resultsContainer.contains(e.target)) {
+                input.focus();
+            }
+        });
+
+        // Handle escape to clear/reset
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (input.value === '' && resultsContainer.classList.contains('active')) {
+                    // Reset to home
+                    header.classList.remove('has-results');
+                    resultsContainer.classList.remove('active');
+                    welcome.style.display = 'flex';
+                    resultsFrame.src = '';
+                } else {
+                    input.value = '';
+                    input.focus();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

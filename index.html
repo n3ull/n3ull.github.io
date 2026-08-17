@@ -1,310 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cog</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cog</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            background: #000000;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+    body {
+        background: #000000;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
 
-        .header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            flex-shrink: 0;
-            transition: padding 0.3s;
-        }
+    .wrap {
+        width: 100%;
+        max-width: 640px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 28px;
+    }
 
-        .header.has-results {
-            padding: 20px;
-            flex-direction: row;
-            gap: 20px;
-            border-bottom: 1px solid #1a1a1a;
-        }
+    .icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: #101010;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -1px;
+    }
 
-        .icon {
-            width: 60px;
-            height: 60px;
-            transition: all 0.3s;
-        }
+    h1 {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #555;
+    }
 
-        .header.has-results .icon {
-            width: 32px;
-            height: 32px;
-        }
+    .search-container { width: 100%; position: relative; }
 
-        .icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: brightness(0) invert(1);
-        }
+    #searchInput {
+        width: 100%;
+        background: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 18px 50px 18px 22px;
+        font-size: 17px;
+        color: #000000;
+        outline: none;
+    }
 
-        .search-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-            max-width: 600px;
-        }
+    #searchInput::placeholder { color: #888; }
 
-        .header.has-results .search-section {
-            flex-direction: row;
-            max-width: none;
-        }
+    .search-icon {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        color: #999;
+        pointer-events: none;
+    }
 
-        .search-container {
-            position: relative;
-            width: 100%;
-        }
+    .engines {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-        .header.has-results .search-container {
-            max-width: 500px;
-        }
+    .engine {
+        background: #111;
+        border: 1px solid #222;
+        color: #888;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        padding: 8px 16px;
+        border-radius: 20px;
+        transition: all 0.15s ease;
+    }
 
-        #searchInput {
-            width: 100%;
-            background: #ffffff;
-            border: none;
-            border-radius: 4px;
-            padding: 18px 50px 18px 24px;
-            font-size: 18px;
-            color: #000000;
-            outline: none;
-            cursor: help;
-        }
+    .engine:hover { color: #fff; border-color: #444; }
 
-        .header.has-results #searchInput {
-            padding: 12px 45px 12px 18px;
-            font-size: 16px;
-        }
+    .engine.active {
+        color: #000;
+        background: #fff;
+        border-color: #fff;
+    }
 
-        #searchInput::placeholder {
-            color: #666666;
-        }
+    .hint {
+        font-size: 11px;
+        color: #444;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
 
-        .search-wrapper {
-            position: relative;
-        }
+    .notice {
+        font-size: 12px;
+        color: #555;
+        text-align: center;
+        line-height: 1.6;
+        max-width: 420px;
+    }
 
-        .search-wrapper::after {
-            content: '?';
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #000000;
-            font-size: 20px;
-            font-weight: 300;
-            pointer-events: none;
-            opacity: 0.4;
-        }
+    .history {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
 
-        .header.has-results .search-wrapper::after {
-            font-size: 16px;
-            right: 16px;
-        }
+    .history-title {
+        font-size: 10px;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 4px;
+    }
 
-        #searchInput:focus + .search-wrapper::after,
-        .search-wrapper:focus-within::after {
-            opacity: 0;
-        }
+    .history-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #0c0c0c;
+        border: 1px solid #1a1a1a;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 14px;
+        color: #999;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
 
-        .engines {
-            display: flex;
-            gap: 16px;
-        }
+    .history-item:hover {
+        background: #151515;
+        color: #fff;
+    }
 
-        .header.has-results .engines {
-            gap: 12px;
-        }
+    .history-item span.engine-tag {
+        font-size: 10px;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-        .engine {
-            background: transparent;
-            border: none;
-            color: #333333;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            padding: 4px 8px;
-            transition: color 0.2s;
-        }
+    .clear-history {
+        align-self: center;
+        background: none;
+        border: none;
+        color: #333;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        margin-top: 6px;
+    }
 
-        .engine:hover,
-        .engine.active {
-            color: #ffffff;
-        }
-
-        .hint {
-            font-size: 12px;
-            color: #444444;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .header.has-results .hint {
-            display: none;
-        }
-
-        .results-container {
-            flex: 1;
-            display: none;
-            background: #0a0a0a;
-        }
-
-        .results-container.active {
-            display: block;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #ffffff;
-        }
-
-        .welcome {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #222222;
-            font-size: 14px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-    </style>
+    .clear-history:hover { color: #888; }
+</style>
 </head>
 <body>
-    <div class="header" id="header">
-        <div class="icon">
-            <img src="https://files.catbox.moe/uvpf1q.png" alt="Cog" onerror="this.style.display='none'">
-        </div>
+<div class="wrap">
+    <div class="icon">C</div>
+    <h1>Cog</h1>
 
-        <div class="search-section">
-            <div class="search-container">
-                <div class="search-wrapper">
-                    <input 
-                        type="text" 
-                        id="searchInput" 
-                        placeholder="Search incognito..." 
-                        autocomplete="off"
-                        spellcheck="false"
-                        autofocus
-                    >
-                </div>
-            </div>
-
-            <div class="engines">
-                <button class="engine active" onclick="setEngine('swisscows', this)">SwissCows</button>
-                <button class="engine" onclick="setEngine('duckduckgo', this)">DuckDuckGo</button>
-                <button class="engine" onclick="setEngine('brave', this)">Brave</button>
-            </div>
-        </div>
-
-        <div class="hint">Press Enter to search</div>
+    <div class="search-container">
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search incognito..."
+            autocomplete="off"
+            spellcheck="false"
+            autofocus
+        >
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
     </div>
 
-    <div class="welcome" id="welcome">
-        Type to begin
+    <div class="engines">
+        <button class="engine active" data-engine="duckduckgo">DuckDuckGo</button>
+        <button class="engine" data-engine="brave">Brave</button>
+        <button class="engine" data-engine="swisscows">SwissCows</button>
+        <button class="engine" data-engine="startpage">Startpage</button>
     </div>
 
-    <div class="results-container" id="resultsContainer">
-        <iframe id="resultsFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+    <div class="hint">Press Enter to search &middot; opens in a new tab</div>
+
+    <div class="notice">
+        Results open in a new tab instead of embedding here, because search engines
+        block being loaded inside another site's page (this is enforced on their end
+        and can't be bypassed). This keeps your search private and the connection direct.
     </div>
 
-    <script>
-        let currentEngine = 'swisscows';
-        
-        const engines = {
-            swisscows: 'https://swisscows.com/web?query=',
-            duckduckgo: 'https://duckduckgo.com/?q=',
-            brave: 'https://search.brave.com/search?q=',
-            startpage: 'https://www.startpage.com/do/dsearch?query='
-        };
+    <div class="history" id="historyBlock" style="display:none;">
+        <div class="history-title">Recent</div>
+        <div id="historyList"></div>
+        <button class="clear-history" id="clearHistory">Clear history</button>
+    </div>
+</div>
 
-        const input = document.getElementById('searchInput');
-        const header = document.getElementById('header');
-        const resultsContainer = document.getElementById('resultsContainer');
-        const resultsFrame = document.getElementById('resultsFrame');
-        const welcome = document.getElementById('welcome');
+<script>
+    let currentEngine = 'duckduckgo';
+    let history = [];
 
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const query = input.value.trim();
-                if (query) {
-                    performSearch(query);
-                }
-            }
-        });
+    const engines = {
+        duckduckgo: { url: 'https://duckduckgo.com/?q=', label: 'DuckDuckGo' },
+        brave:      { url: 'https://search.brave.com/search?q=', label: 'Brave' },
+        swisscows:  { url: 'https://swisscows.com/web?query=', label: 'SwissCows' },
+        startpage:  { url: 'https://www.startpage.com/sp/search?query=', label: 'Startpage' }
+    };
 
-        function performSearch(query) {
-            const url = engines[currentEngine] + encodeURIComponent(query);
-            
-            // Show results view
-            header.classList.add('has-results');
-            welcome.style.display = 'none';
-            resultsContainer.classList.add('active');
-            
-            // Load results in iframe
-            resultsFrame.src = url;
-        }
+    const input = document.getElementById('searchInput');
+    const engineButtons = document.querySelectorAll('.engine');
+    const historyBlock = document.getElementById('historyBlock');
+    const historyList = document.getElementById('historyList');
+    const clearHistoryBtn = document.getElementById('clearHistory');
 
-        function setEngine(engine, btn) {
-            currentEngine = engine;
-            document.querySelectorAll('.engine').forEach(b => b.classList.remove('active'));
+    engineButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentEngine = btn.dataset.engine;
+            engineButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
-            // Reload current search if exists
+            input.focus();
+        });
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
             const query = input.value.trim();
-            if (query && resultsContainer.classList.contains('active')) {
-                performSearch(query);
-            } else {
-                input.focus();
-            }
+            if (query) performSearch(query);
         }
+        if (e.key === 'Escape') {
+            input.value = '';
+        }
+    });
 
-        // Keep focus on input
-        document.addEventListener('click', (e) => {
-            if (e.target.tagName !== 'INPUT' && !e.target.classList.contains('engine') && !resultsContainer.contains(e.target)) {
-                input.focus();
-            }
-        });
+    function performSearch(query) {
+        const engine = engines[currentEngine];
+        const url = engine.url + encodeURIComponent(query);
 
-        // Handle escape to clear/reset
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (input.value === '' && resultsContainer.classList.contains('active')) {
-                    // Reset to home
-                    header.classList.remove('has-results');
-                    resultsContainer.classList.remove('active');
-                    welcome.style.display = 'flex';
-                    resultsFrame.src = '';
-                } else {
-                    input.value = '';
-                    input.focus();
-                }
-            }
+        // Open in a new tab -- search engines block iframe embedding via
+        // X-Frame-Options / CSP, so this is the only reliable way to show results.
+        window.open(url, '_blank', 'noopener,noreferrer');
+
+        addToHistory(query, engine.label);
+        input.value = '';
+    }
+
+    function addToHistory(query, engineLabel) {
+        history.unshift({ query, engineLabel });
+        history = history.slice(0, 8);
+        renderHistory();
+    }
+
+    function renderHistory() {
+        if (history.length === 0) {
+            historyBlock.style.display = 'none';
+            return;
+        }
+        historyBlock.style.display = 'flex';
+        historyList.innerHTML = '';
+        history.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `<span>${escapeHtml(item.query)}</span><span class="engine-tag">${item.engineLabel}</span>`;
+            div.addEventListener('click', () => {
+                input.value = item.query;
+                performSearch(item.query);
+            });
+            historyList.appendChild(div);
         });
-    </script>
+    }
+
+    clearHistoryBtn.addEventListener('click', () => {
+        history = [];
+        renderHistory();
+    });
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    input.focus();
+</script>
 </body>
 </html>
